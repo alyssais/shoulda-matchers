@@ -955,6 +955,7 @@ module Shoulda
           self
         end
 
+        # TODO: Removed when Rails 4.x support is finished.
         def required(required = true)
           @options[:required] = required
           self
@@ -998,7 +999,7 @@ module Shoulda
             primary_key_exists? &&
             class_name_correct? &&
             join_table_correct? &&
-            required_correct? &&
+            required_correct? && # TODO: Removed when Rails 4.x support is finished.
             autosave_correct? &&
             conditions_correct? &&
             validate_correct? &&
@@ -1154,6 +1155,7 @@ module Shoulda
           end
         end
 
+        # TODO: Removed when Rails 4.x support is finished.
         def required_correct?
           if options.key?(:required)
             if option_verifier.correct_for_boolean?(:required, options[:required])
