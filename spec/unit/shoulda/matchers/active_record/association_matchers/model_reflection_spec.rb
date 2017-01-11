@@ -95,10 +95,25 @@ describe Shoulda::Matchers::ActiveRecord::AssociationMatchers::ModelReflection d
             person_model = define_model(:person, country_id: :integer) do
               belongs_to :country, -> { where(mood: 'nice') }
             end
+            person_instance = person_model.new(spirit: 'nice')
             delegate_reflection = person_model.reflect_on_association(:country)
             reflection = described_class.new(delegate_reflection)
 
-            actual_sql = reflection.association_relation.to_sql
+            actual_sql = reflection.association_relation(person_instance).to_sql
+            expected_sql = Country.where(mood: 'nice').to_sql
+            expect(actual_sql).to eq expected_sql
+          end
+
+          it 'executes the block in the context of an empty scope parametrised by association source' do
+            define_model(:country, mood: :string)
+            person_model = define_model(:person, country_id: :integer, spirit: :string) do
+              belongs_to :country, -> (person) { where(mood: person.spirit) }
+            end
+            person_instance = person_model.new(spirit: 'nice')
+            delegate_reflection = person_model.reflect_on_association(:country)
+            reflection = described_class.new(delegate_reflection)
+
+            actual_sql = reflection.association_relation(person_instance).to_sql
             expected_sql = Country.where(mood: 'nice').to_sql
             expect(actual_sql).to eq expected_sql
           end
@@ -113,7 +128,7 @@ describe Shoulda::Matchers::ActiveRecord::AssociationMatchers::ModelReflection d
             delegate_reflection = person_model.reflect_on_association(:country)
             reflection = described_class.new(delegate_reflection)
 
-            actual_sql = reflection.association_relation.to_sql
+            actual_sql = reflection.association_relation(person_model).to_sql
             expected_sql = Country.all.to_sql
             expect(actual_sql).to eq expected_sql
           end
