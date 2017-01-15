@@ -104,18 +104,19 @@ describe Shoulda::Matchers::ActiveRecord::AssociationMatchers::ModelReflection d
             expect(actual_sql).to eq expected_sql
           end
 
-          it 'executes the block in the context of an empty scope parametrised by association source' do
+          it 'pass instance of association source to block' do
+            spy = spy('spy')
             define_model(:country, mood: :string)
-            person_model = define_model(:person, country_id: :integer, spirit: :string) do
-              belongs_to :country, -> (person) { where(mood: person.spirit) }
+            person_model = define_model(:person, country_id: :integer) do
+              belongs_to :country, ->(person) { spy.who(person) }
             end
             person_instance = person_model.new(spirit: 'nice')
             delegate_reflection = person_model.reflect_on_association(:country)
             reflection = described_class.new(delegate_reflection)
 
-            actual_sql = reflection.association_relation(person_instance).to_sql
-            expected_sql = Country.where(mood: 'nice').to_sql
-            expect(actual_sql).to eq expected_sql
+            reflection.association_relation(person_instance)
+
+            expect(spy).to have_received(:who).with(person_instance)
           end
         end
 
