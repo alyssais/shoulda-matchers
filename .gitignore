@@ -11,3 +11,4 @@ source
 spec/examples.txt
 tmp
 Gemfile.lock
+gemfiles/*.gemfile.lock
